@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add Savings</title>
+    <style>
+        /* Success message styles */
+        .success-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #28a745; /* Green color */
+            color: white;
+            border-radius: 5px;
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 20px; /* Position from the top */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .back-to-dashboard {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            background-color: transparent;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: rgb(72, 72, 213);
+            border-radius: 50px;
+            color: black;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: rgb(85, 85, 209);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(rgba(111, 98, 198, 0.8), rgba(91, 98, 202, 0.8)),
+                url('mp1.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dashboard {
+            max-width: 800px;
+            width: 90%;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        form input,
+        form button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            background-color: rgb(98, 98, 208);
+            color: rgb(23, 22, 22);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: rgb(104, 104, 217);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Success message div -->
+    <div id="success-message" class="success-message">
+        Income added successfully!
+    </div>
+
+    <div class="back-to-dashboard">
+        <a href="dashboard.html" class="back-button">Back to Dashboard</a>
+    </div>
+
+    <div class="dashboard">
+        <h2>Add Income</h2>
+        <form id="savings-form">
+            <label for="savings-amount">Income Amount:</label>
+            <input type="number" id="savings-amount" name="amount" required>
+
+            <label for="savings-date">Date:</label>
+            <input type="date" id="savings-date" name="date" required>
+
+            <button type="submit">Add Income</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('savings-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const amount = document.getElementById('savings-amount').value;
+            const date = document.getElementById('savings-date').value;
+
+            // Convert the date into a string in the DD-MM-YYYY format
+            const dateParts = date.split('-'); // [YYYY, MM, DD]
+            const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+
+            // Send the data to the server (assuming /add-savings route)
+            fetch('/add-savings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    date: formattedDate // Ensure date is a string
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the success message
+                const successMessage = document.getElementById("success-message");
+                successMessage.style.display = "block";
+                
+                // Hide the success message after 3 seconds
+                setTimeout(() => {
+                    successMessage.style.display = "none";
+                }, 3000);
+
+                // Optionally redirect to dashboard
+                window.location.href = 'dashboard.html';
+            })
+            .catch(error => {
+                console.error('Error adding savings:', error);
+                alert('Error adding savings.');
+            });
+        });
+    </script>
+</body>
+
+</html>

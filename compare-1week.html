@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Expenses (Last 1 Week)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body style="background-color: azure;">
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="dashboard.html">Back to Dashboard</a>
+    </div>
+
+    <div class="dashboard">
+        <h2>Expense Comparison (Last 1 Week)</h2>
+        <canvas id="compare-7days-chart" width="40" height="15"></canvas>
+    </div>
+
+    <script>
+        // Fetch data from the backend (Updated API route to /api/expenses/week-summary)
+        fetch('/api/expenses/week-summary')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+
+                // Extract the days and chart data from the response
+                const days = data.days;
+                const chartData = data.chartData;
+
+                // Create the chart with the dynamically fetched data
+                const ctx = document.getElementById('compare-7days-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: days,  // Days (e.g., Day 1, Day 2, ..., Day 7)
+                        datasets: chartData  // Data for each category (Food, Transport, etc.)
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching data:', err);
+            });
+    </script>
+</body>
+
+</html>

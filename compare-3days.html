@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Compare Expenses (Last 3 Days)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body style="background-color: aliceblue;">
+    <!-- Back Button -->
+    <div class="back-button" style="color: white;">
+        <a href="dashboard.html">Back to Dashboard</a>
+    </div>
+
+    <div class="dashboard">
+        <h2>Expense Comparison (Last 3 Days)</h2>
+        <!-- Chart Container -->
+        <canvas id="compare-3days-chart" width="400" height="150"></canvas>
+
+    </div>
+
+    <script>
+        // Fetch data from the backend and populate the chart
+        async function fetchAndDisplayExpenses() {
+            try {
+                // Fetch data from the backend API for last 3 days
+                const response = await fetch('/api/expenses/comparison');
+                const { days, chartData } = await response.json();
+
+                // Initialize the chart
+                const ctx = document.getElementById('compare-3days-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: days,  // X-axis labels (Last 3 Days)
+                        datasets: chartData  // Data to display
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching expense comparison data:', error);
+            }
+        }
+
+        // Fetch and display the data
+        fetchAndDisplayExpenses();
+    </script>
+</body>
+
+</html>

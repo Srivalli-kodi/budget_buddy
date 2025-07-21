@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Compare Expenses (Last 30 Days)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body style="background-color: azure;">
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="dashboard.html">Back to Dashboard</a>
+    </div>
+
+    <div class="dashboard">
+        <h2>Expense Comparison (Last 30 Days)</h2>
+        <!-- Smaller canvas size -->
+        <canvas id="compare-30days-chart" width="40" height="15"></canvas>
+    </div>
+
+    <script>
+        // Fetch data from the backend for the last 30 days
+        fetch('/api/expenses/last30days')
+            .then(response => response.json())
+            .then(data => {
+                const chartData = data.chartData;
+                const days = data.days;
+
+                // Create the chart using the data from the backend
+                const monthChartCtx = document.getElementById('compare-30days-chart').getContext('2d');
+                new Chart(monthChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: days,  // Labels: Day 1 to Day 30
+                        datasets: chartData
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    autoSkip: true,
+                                    maxTicksLimit: 10, // To avoid crowding labels on the X-axis
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching the expenses data:', err);
+            });
+    </script>
+</body>
+
+</html>

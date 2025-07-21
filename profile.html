@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(15, 2, 107, 0.8), rgba(47, 9, 174, 0.8)),
+                url('mp1.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column; /* Use column direction for vertical layout */
+            justify-content: flex-start; /* Align content at the top */
+            align-items: center;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            background-color: transparent;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            background-color: rgb(72, 72, 213);
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none; /* Remove the underline from the link */
+        }
+
+        .back-button:hover {
+            background-color: rgb(85, 85, 209);
+        }
+
+        /* Profile content styling */
+        h1 {
+            color: aliceblue;
+            margin-top: 20px; /* Reduced space between heading and profile box */
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .quote {
+            font-size: 18px;
+            color: #f1f1f1;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 120px); /* Adjust for navbar and profile header */
+            padding: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 80px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #111112;
+            margin-bottom: 20px;
+        }
+
+        .profile-card h2 {
+            margin: 10px 0;
+            font-size: 22px;
+            color: #333;
+        }
+
+        .profile-card p {
+            font-size: 16px;
+            color: #666;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Back button at the top left -->
+    <div class="navbar">
+        <a href="dashboard.html" class="back-button">Back to Dashboard</a>
+    </div>
+
+    <!-- Profile Header -->
+    <h1>Profile</h1>
+
+    <!-- Quote below the header -->
+    <p class="quote">"Tracking your spending is the first step to financial success"</p>
+
+    <!-- Profile content -->
+    <div class="profile-container">
+        <div class="profile-card">
+            <img src="profile.png" alt="Profile Picture">
+            <h2 id="user-name">Loading...</h2>
+            <p>Email: <span id="user-email">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Fetch user data from the server
+        const fetchUserData = async () => {
+            try {
+                // Fetch the user profile data using session userId
+                const response = await fetch('http://localhost:3019/profile', {
+                    method: 'GET',
+                    credentials: 'same-origin',  // Ensure session cookies are sent with the request
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch profile: ${response.statusText}`);
+                }
+
+                // Parse response JSON
+                const userData = await response.json();
+
+                // Update UI with user data
+                document.getElementById('user-name').textContent = userData.username;
+                document.getElementById('user-email').textContent = userData.email;
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                document.getElementById('user-name').textContent = 'Error loading profile';
+                document.getElementById('user-email').textContent = '';
+            }
+        };
+
+        // Call the function to fetch and display user data
+        fetchUserData();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 20%;
+            background: linear-gradient(to right, #4a6bd8, #3c40c5, rgb(57, 57, 177));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            margin: 10px 0;
+            display: block;
+            text-align: center;
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(3, 7, 106, 0.4);
+            color: white;
+        }
+
+        .dashboard {
+            margin-left: 22%;
+            padding: 20px;
+            width: 78%;
+            position: relative;
+            background: linear-gradient(rgba(111, 98, 198, 0.9), rgba(91, 98, 202, 0.9)),
+                url('mp1.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dashboard h1 {
+            margin: 10px 0;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard h3 {
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .top-metrics {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .top-metrics .metric {
+            background-color: rgba(83, 59, 189, 0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #e4dfdf;
+        }
+
+        #daily-chart-container {
+            max-width: 600px;
+            margin: 80px auto 20px; /* Adjusted margin to accommodate metrics on top */
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #daily-chart-container h3 {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h1>Budget Buddy</h1>
+        <a href="profile.html" id="profile-link">Profile</a>
+        <a href="addexpenses.html" id="add-expenses-link">Add Expenses</a>
+        <a href="compare-3days.html" id="compare-3days-link">Compare (3 Days)</a>
+        <a href="compare-1week.html" id="compare-1week-link">Compare (1 Week)</a>
+        <a href="compare-1month.html" id="compare-1month-link">Compare (1 Month)</a>
+        <a href="addsavings.html" id="savings-link">Add Income</a>
+        <a href="/logout" id="logout-link">Logout</a>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="top-metrics">
+            <div class="metric">
+                <h3>Total Expenses (This Month)</h3>
+                ₹<span id="monthly-expenses">0</span>
+            </div>
+            <div class="metric">
+                <h3>Total Income (This Month)</h3>
+                ₹<span id="monthly-savings">0</span>
+            </div>
+        </div>
+
+        <h1>Welcome, <span id="user-name">User</span>!</h1>
+        <h3>Today's Expenses: ₹<span id="today-expenses">0</span></h3>
+        <div id="daily-chart-container">
+            <h3>Pie Chart of Today's Expenses</h3>
+            <canvas id="daily-chart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        async function fetchTodayExpenses() {
+            try {
+                const response = await fetch('/expenses/today');
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                
+                const data = await response.json();
+                console.log(data);
+
+                // Update User Name
+                document.getElementById('user-name').textContent = data.username || "User";
+
+                if (!data.expenses || data.expenses.length === 0) {
+                    document.getElementById('today-expenses').textContent = '0';
+                    document.getElementById('daily-chart-container').style.display = 'none';
+                    return;
+                }
+
+                // Update Total Expenses
+                document.getElementById('today-expenses').textContent = data.totalAmount.toFixed(2);
+
+                const categories = data.expenses.map(expense => expense._id || "Unknown");
+                const amounts = data.expenses.map(expense => expense.totalAmount);
+
+                const categoryColors = {
+                    "Food": "#FF6384",
+                    "Transport": "#36A2EB",
+                    "Entertainment": "#FFCD56",
+                    "Others": "#90EE90"
+                };
+
+                const colors = categories.map(category => categoryColors[category] || "#CCCCCC");
+
+                if (window.dailyChart) window.dailyChart.destroy();
+
+                const ctx = document.getElementById("daily-chart").getContext("2d");
+                window.dailyChart = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: amounts,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: "bottom" } }
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching expenses:", error);
+            }
+        }
+        
+    async function fetchMonthlyData() {
+        try {
+            // Fetch monthly data from the backend
+            const response = await fetch('/monthly-dashboard');
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            
+            const data = await response.json();
+            console.log(data);
+
+            // Update monthly expenses and savings in the dashboard
+            document.getElementById('monthly-expenses').textContent = data.totalExpenses.toFixed(2);
+            document.getElementById('monthly-savings').textContent = data.totalSavings.toFixed(2);
+        } catch (error) {
+            console.error("Error fetching monthly data:", error);
+        }
+    }
+
+    // Call the function when the page loads
+    window.onload = async () => {
+        await fetchTodayExpenses(); // Function for daily expenses
+        await fetchMonthlyData();  // Fetch and display monthly data
+    };
+    </script>
+</body>
+
+</html>

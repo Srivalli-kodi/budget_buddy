@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>HTML Login & Signup Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background:
+                linear-gradient(rgba(15, 2, 107, 0.5), rgba(47, 9, 174, 0.5)),
+                url('mp1.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main {
+            background: linear-gradient(
+                rgba(255, 255, 255, 0.5),
+                rgba(255, 255, 255, 0.5)
+            );
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            color: rgb(38, 102, 228);
+        }
+
+        h3 {
+            color: black;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            background: rgb(59, 59, 209);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background: rgb(78, 78, 235);
+        }
+
+        a {
+            color: rgb(84, 84, 224);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 38%;
+            right: 5px;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            text-align: left;
+            margin: -10px 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <h1>BudgetBuddy</h1>
+        <h3 id="formTitle">Enter your login credentials</h3>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="form-container active" action="/login" method="POST">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" placeholder="Enter your Username" required>
+
+            <label for="loginPassword">Password:</label>
+            <div class="password-container">
+                <input type="password" id="loginPassword" name="password" placeholder="Enter your Password" required>
+                <span class="toggle-password" onclick="togglePassword('loginPassword')">&#128065;</span>
+            </div>
+
+            <button type="submit">Sign In</button>
+            <p>Not registered? <a onclick="showSignup()">Create an account</a></p>
+            <p><a onclick="showForgotPassword()">Forgot Password?</a></p>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="form-container" action="/register" method="POST">
+            <label for="signupUsername">Username:</label>
+            <input type="text" id="signupUsername" name="username" placeholder="Choose a Username" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your Email" required>
+
+            <label for="signupPassword">Password:</label>
+            <div class="password-container">
+                <input type="password" id="signupPassword" name="password" placeholder="Create a Password" required>
+                <span class="toggle-password" onclick="togglePassword('signupPassword')">&#128065;</span>
+            </div>
+            <div id="passwordError" class="error"></div>
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <div class="password-container">
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                <span class="toggle-password" onclick="togglePassword('confirmPassword')">&#128065;</span>
+            </div>
+            <div id="confirmPasswordError" class="error"></div>
+
+            <button type="button" onclick="validateSignupForm()">Sign Up</button>
+            <p>Already registered? <a onclick="showLogin()">Sign In</a></p>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form id="forgotPasswordForm" class="form-container" onsubmit="handleForgotPasswordDisplay(event)">
+            <label for="forgotUsername">Enter your username:</label>
+            <input type="text" id="forgotUsername" name="username" placeholder="Enter your Username" required>
+
+            <label for="forgotEmail">Enter your registered email:</label>
+            <input type="email" id="forgotEmail" name="email" placeholder="Enter your Email" required>
+
+            <button type="submit">Retrieve Password</button>
+            <p><a onclick="showLogin()">Back to Login</a></p>
+            <div id="forgotPasswordError" class="error"></div>
+            <div id="retrievedPassword" style="color: green; margin-top: 10px; display: none;"></div>
+        </form>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const formTitle = document.getElementById('formTitle');
+        const forgotPasswordError = document.getElementById('forgotPasswordError');
+
+        function showSignup() {
+            loginForm.classList.remove('active');
+            forgotPasswordForm.classList.remove('active');
+            signupForm.classList.add('active');
+            formTitle.textContent = "Create a new account";
+        }
+
+        function showLogin() {
+            signupForm.classList.remove('active');
+            forgotPasswordForm.classList.remove('active');
+            loginForm.classList.add('active');
+            formTitle.textContent = "Enter your login credentials";
+        }
+
+        function showForgotPassword() {
+            loginForm.classList.remove('active');
+            signupForm.classList.remove('active');
+            forgotPasswordForm.classList.add('active');
+            formTitle.textContent = "Forgot Password";
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+            } else {
+                field.type = "password";
+            }
+        }
+
+        function validateSignupForm() {
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const email = document.getElementById('email').value;
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+    const emailError = document.getElementById('emailError') || document.createElement('div');
+
+    // Ensure email error container exists
+    if (!emailError.id) {
+        emailError.id = 'emailError';
+        emailError.className = 'error';
+        document.getElementById('email').insertAdjacentElement('afterend', emailError);
+    }
+
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    passwordError.textContent = "";
+    confirmPasswordError.textContent = "";
+    emailError.textContent = "";
+
+    if (!gmailRegex.test(email)) {
+        emailError.textContent = "Please enter a valid Gmail address (e.g., username@gmail.com).";
+        return false;
+    }
+
+    if (!strongPasswordRegex.test(password)) {
+        passwordError.textContent = "Password must be at least 8 characters long, include uppercase, lowercase, number, and special character.";
+        return false;
+    }
+
+    if (password !== confirmPassword) {
+        confirmPasswordError.textContent = "Passwords do not match.";
+        return false;
+    }
+
+    signupForm.submit();
+}
+
+
+        async function handleForgotPasswordDisplay(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('forgotUsername').value;
+            const email = document.getElementById('forgotEmail').value;
+            const retrievedPassword = document.getElementById('retrievedPassword');
+
+            forgotPasswordError.textContent = "";
+            retrievedPassword.style.display = "none";
+            retrievedPassword.textContent = "";
+
+            try {
+                const response = await fetch('/retrieve-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email }),
+                });
+
+                if (!response.ok) {
+                    forgotPasswordError.textContent = await response.text();
+                } else {
+                    const data = await response.json();
+                    if (data.password) {
+                        retrievedPassword.textContent = `Your password is: ${data.password}`;
+                        retrievedPassword.style.display = "block";
+                    }
+                }
+            } catch (error) {
+                forgotPasswordError.textContent = 'An error occurred. Please try again later.';
+            }
+        }
+    </script>
+</body>
+
+</html>
