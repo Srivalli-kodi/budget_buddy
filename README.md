@@ -8,9 +8,9 @@ Budget Buddy is a personal finance management app designed to help users track i
   - Last 3 Days  
   - This Week  
   - This Month
-- 📊 Visualize expenses using interactive charts (Recharts)
-- 💾 Data persistence using browser localStorage
-- 🧠 Built with React Context for global state management
+- 📊 Visualize expenses using interactive charts
+
+  
 
 
 TECHNOLOGIES:
