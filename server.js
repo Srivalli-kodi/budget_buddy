@@ -21,10 +21,9 @@ app.use(
 );
 
 // MongoDB Connection
-mongoose
-    .connect('mongodb://127.0.0.1:27017/users', { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connection successful'))
-    .catch((err) => console.error('MongoDB connection error:', err));
+mongoose.connect('mongodb://127.0.0.1:27017/budget_buddy')
+.then(() => console.log('MongoDB connection successful'))
+.catch((err) => console.error('MongoDB connection error:', err));
 
 // Schema and Models
 
