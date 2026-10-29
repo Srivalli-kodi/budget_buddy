@@ -6,6 +6,7 @@ const session = require('express-session');
 const app = express();
 const port = 3019;
 
+
 // Middleware
 app.use(express.static(path.join(__dirname)));  // Serve static files
 app.use(express.json());  // Parse JSON request body
